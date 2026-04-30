@@ -1,22 +1,22 @@
 body{
-margin:0;
-overflow:hidden;
-background:#87ceeb;
-font-family:Arial;
+  margin:0;
+  overflow:hidden;
+  background:#87ceeb;
+  font-family:Arial, sans-serif;
 }
 
 canvas{
-display:block;
+  display:block;
 }
 
 #hud{
-position:absolute;
-top:10px;
-left:10px;
-color:white;
-background:rgba(0,0,0,0.5);
-padding:10px;
-border-radius:10px;
-z-index:10;
-font-size:18px;
+  position:absolute;
+  top:10px;
+  left:10px;
+  color:white;
+  background:rgba(0,0,0,0.6);
+  padding:12px;
+  border-radius:10px;
+  font-size:16px;
+  z-index:10;
 }
