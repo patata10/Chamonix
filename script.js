@@ -10,51 +10,57 @@ animate();
 function init(){
 
 scene=new THREE.Scene();
+scene.fog=new THREE.Fog(0xcce0ff,80,600);
+
 camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,0.1,2000);
 
 renderer=new THREE.WebGLRenderer({antialias:true});
 renderer.setSize(innerWidth,innerHeight);
 document.body.appendChild(renderer.domElement);
 
-// LLUM
+// llum
 scene.add(new THREE.AmbientLight(0xffffff,0.6));
 let sun=new THREE.DirectionalLight(0xffffff,1);
 sun.position.set(100,200,100);
 scene.add(sun);
 
-// TERRA
+// terra
 let ground=new THREE.Mesh(
-new THREE.PlaneGeometry(3000,3000),
+new THREE.PlaneGeometry(2000,2000),
 new THREE.MeshStandardMaterial({color:0x6ea85d})
 );
 ground.rotation.x=-Math.PI/2;
 scene.add(ground);
 
-// RIU
+// RIU (Arve)
 let river=new THREE.Mesh(
-new THREE.PlaneGeometry(30,1500),
+new THREE.PlaneGeometry(25,600),
 new THREE.MeshStandardMaterial({color:0x4da6ff})
 );
 river.rotation.x=-Math.PI/2;
-river.position.x=50;
+river.position.set(30,0.02,-100);
 scene.add(river);
 
-// CARRETERES (xarxa tipus mapa)
-createRoad(0,0);
-createRoad(10,-200);
-createRoad(-15,-400);
-createCrossRoad(0,-200);
+// CARRETERA PRINCIPAL CORBA (centre)
+createRoadPath();
+
+// PLAÇA CENTRAL
+createSquare(0,-100);
+
+// CARRERS SECUNDARIS
+createStreet(10,-100);
+createStreet(-10,-150);
 
 // PASSOS ZEBRA
-createZebra(0,-100);
-createZebra(10,-200);
+createZebra(0,-80);
+createZebra(5,-120);
 
 // SEMÀFORS
-createLight(2,-100);
-createLight(-2,-200);
+createLight(2,-80);
+createLight(-2,-120);
 
-// EDIFICIS
-createCity();
+// EDIFICIS CHALET REALISTES
+createChalets();
 
 // COTXE
 createCar();
@@ -63,31 +69,40 @@ window.addEventListener("keydown",e=>keys[e.key]=true);
 window.addEventListener("keyup",e=>keys[e.key]=false);
 }
 
-// CARRETERES
-function createRoad(x,z){
+function createRoadPath(){
 for(let i=0;i<40;i++){
 let road=new THREE.Mesh(
-new THREE.PlaneGeometry(14,20),
+new THREE.PlaneGeometry(12,20),
 new THREE.MeshStandardMaterial({color:0x2a2a2a})
 );
 road.rotation.x=-Math.PI/2;
-road.position.set(x+Math.sin(i*0.2)*10,0,-i*20+z);
+road.position.set(Math.sin(i*0.3)*10,0,-i*20);
 scene.add(road);
 }
 }
 
-// CRUÏLLA
-function createCrossRoad(x,z){
+function createStreet(x,z){
+for(let i=0;i<10;i++){
 let road=new THREE.Mesh(
-new THREE.PlaneGeometry(40,40),
+new THREE.PlaneGeometry(8,15),
 new THREE.MeshStandardMaterial({color:0x2a2a2a})
 );
 road.rotation.x=-Math.PI/2;
-road.position.set(x,0,z);
+road.position.set(x,0,z-i*15);
 scene.add(road);
 }
+}
 
-// ZEBRA
+function createSquare(x,z){
+let sq=new THREE.Mesh(
+new THREE.PlaneGeometry(40,40),
+new THREE.MeshStandardMaterial({color:0x3a3a3a})
+);
+sq.rotation.x=-Math.PI/2;
+sq.position.set(x,0,z);
+scene.add(sq);
+}
+
 function createZebra(x,z){
 for(let i=0;i<6;i++){
 let stripe=new THREE.Mesh(
@@ -99,7 +114,6 @@ scene.add(stripe);
 }
 }
 
-// SEMÀFOR
 function createLight(x,z){
 let pole=new THREE.Mesh(
 new THREE.BoxGeometry(0.3,5,0.3),
@@ -118,41 +132,45 @@ scene.add(box);
 lights.push({mesh:box,t:0,state:0});
 }
 
-// EDIFICIS MILLORS
-function createCity(){
-for(let i=0;i<200;i++){
-let h=5+Math.random()*10;
+// CHALET REALISTA
+function createChalets(){
+for(let i=0;i<60;i++){
 
-let mat=new THREE.MeshStandardMaterial({
-color:0x8b5a2b,
-roughness:0.8
-});
+let h=4+Math.random()*4;
 
-let b=new THREE.Mesh(
+// base pedra
+let base=new THREE.Mesh(
+new THREE.BoxGeometry(6,2,6),
+new THREE.MeshStandardMaterial({color:0x888888})
+);
+
+// part fusta
+let wood=new THREE.Mesh(
 new THREE.BoxGeometry(6,h,6),
-mat
+new THREE.MeshStandardMaterial({color:0x8b5a2b})
 );
-
-b.position.set(
-(Math.random()>0.5?1:-1)*(20+Math.random()*40),
-h/2,
--Math.random()*800
-);
-
-scene.add(b);
 
 // sostre
 let roof=new THREE.Mesh(
 new THREE.ConeGeometry(5,3,4),
-new THREE.MeshStandardMaterial({color:0x4b2e1f})
+new THREE.MeshStandardMaterial({color:0x5a2e1a})
 );
-roof.position.set(b.position.x,h+1.5,b.position.z);
+
+let x=(Math.random()>0.5?1:-1)*(15+Math.random()*20);
+let z=-Math.random()*300;
+
+base.position.set(x,1,z);
+wood.position.set(x,h/2+2,z);
+roof.position.set(x,h+3,z);
+
 roof.rotation.y=Math.PI/4;
+
+scene.add(base);
+scene.add(wood);
 scene.add(roof);
 }
 }
 
-// COTXE REAL
 function createCar(){
 car=new THREE.Group();
 
@@ -163,7 +181,6 @@ new THREE.MeshStandardMaterial({color:0xffffff})
 body.position.y=1;
 car.add(body);
 
-// rodes
 for(let i=0;i<4;i++){
 let wheel=new THREE.Mesh(
 new THREE.CylinderGeometry(0.5,0.5,0.5,16),
@@ -182,11 +199,9 @@ wheels.push(wheel);
 scene.add(car);
 }
 
-// LOOP
 function animate(){
 requestAnimationFrame(animate);
 
-// moviment
 if(keys["ArrowUp"]) speed+=0.01;
 if(keys["ArrowDown"]) speed-=0.01;
 
@@ -201,10 +216,8 @@ car.rotation.y+=steer*speed*5;
 car.position.x-=Math.sin(car.rotation.y)*speed;
 car.position.z-=Math.cos(car.rotation.y)*speed;
 
-// rodes
 wheels.forEach(w=>w.rotation.x+=speed*3);
 
-// càmera
 camera.position.set(car.position.x,4,car.position.z+8);
 camera.lookAt(car.position.x,2,car.position.z-6);
 
