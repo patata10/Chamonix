@@ -10,7 +10,7 @@ animate();
 function init(){
 
 scene=new THREE.Scene();
-scene.fog=new THREE.Fog(0xcce0ff,80,600);
+scene.fog=new THREE.Fog(0xcce0ff,80,700);
 
 camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,0.1,2000);
 
@@ -18,13 +18,13 @@ renderer=new THREE.WebGLRenderer({antialias:true});
 renderer.setSize(innerWidth,innerHeight);
 document.body.appendChild(renderer.domElement);
 
-// llum
+// LLUM
 scene.add(new THREE.AmbientLight(0xffffff,0.6));
 let sun=new THREE.DirectionalLight(0xffffff,1);
 sun.position.set(100,200,100);
 scene.add(sun);
 
-// terra
+// TERRA
 let ground=new THREE.Mesh(
 new THREE.PlaneGeometry(2000,2000),
 new THREE.MeshStandardMaterial({color:0x6ea85d})
@@ -32,88 +32,66 @@ new THREE.MeshStandardMaterial({color:0x6ea85d})
 ground.rotation.x=-Math.PI/2;
 scene.add(ground);
 
-// RIU (Arve)
-let river=new THREE.Mesh(
-new THREE.PlaneGeometry(25,600),
-new THREE.MeshStandardMaterial({color:0x4da6ff})
-);
-river.rotation.x=-Math.PI/2;
-river.position.set(30,0.02,-100);
-scene.add(river);
+// CARRETERA CORBA AMB LÍNIES
+createRoad();
 
-// CARRETERA PRINCIPAL CORBA (centre)
-createRoadPath();
-
-// PLAÇA CENTRAL
-createSquare(0,-100);
-
-// CARRERS SECUNDARIS
-createStreet(10,-100);
-createStreet(-10,-150);
-
-// PASSOS ZEBRA
-createZebra(0,-80);
+// PASSOS DE ZEBRA (PERPENDICULARS)
+createZebra(0,-60);
 createZebra(5,-120);
 
 // SEMÀFORS
-createLight(2,-80);
-createLight(-2,-120);
+createLight(3,-60);
+createLight(-3,-120);
 
-// EDIFICIS CHALET REALISTES
-createChalets();
+// EDIFICIS MILLORS
+createBuildings();
 
 // COTXE
 createCar();
 
 window.addEventListener("keydown",e=>keys[e.key]=true);
 window.addEventListener("keyup",e=>keys[e.key]=false);
+window.addEventListener("resize",resize);
 }
 
-function createRoadPath(){
-for(let i=0;i<40;i++){
+// 🚧 CARRETERA REALISTA
+function createRoad(){
+for(let i=0;i<60;i++){
+
+let x=Math.sin(i*0.2)*12;
+
+// asfalt
 let road=new THREE.Mesh(
-new THREE.PlaneGeometry(12,20),
+new THREE.PlaneGeometry(14,20),
 new THREE.MeshStandardMaterial({color:0x2a2a2a})
 );
 road.rotation.x=-Math.PI/2;
-road.position.set(Math.sin(i*0.3)*10,0,-i*20);
+road.position.set(x,0,-i*20);
 scene.add(road);
-}
-}
 
-function createStreet(x,z){
-for(let i=0;i<10;i++){
-let road=new THREE.Mesh(
-new THREE.PlaneGeometry(8,15),
-new THREE.MeshStandardMaterial({color:0x2a2a2a})
-);
-road.rotation.x=-Math.PI/2;
-road.position.set(x,0,z-i*15);
-scene.add(road);
-}
-}
-
-function createSquare(x,z){
-let sq=new THREE.Mesh(
-new THREE.PlaneGeometry(40,40),
-new THREE.MeshStandardMaterial({color:0x3a3a3a})
-);
-sq.rotation.x=-Math.PI/2;
-sq.position.set(x,0,z);
-scene.add(sq);
-}
-
-function createZebra(x,z){
-for(let i=0;i<6;i++){
-let stripe=new THREE.Mesh(
-new THREE.BoxGeometry(3,0.1,1),
+// línia central
+let line=new THREE.Mesh(
+new THREE.BoxGeometry(0.3,0.05,6),
 new THREE.MeshStandardMaterial({color:0xffffff})
 );
-stripe.position.set(x,0.05,z+i*2);
+line.position.set(x,0.05,-i*20);
+scene.add(line);
+}
+}
+
+// 🚶 ZEBRA (correcte)
+function createZebra(x,z){
+for(let i=0;i<8;i++){
+let stripe=new THREE.Mesh(
+new THREE.BoxGeometry(10,0.05,0.8),
+new THREE.MeshStandardMaterial({color:0xffffff})
+);
+stripe.position.set(x,0.05,z+i*1.5);
 scene.add(stripe);
 }
 }
 
+// 🚦 SEMÀFORS
 function createLight(x,z){
 let pole=new THREE.Mesh(
 new THREE.BoxGeometry(0.3,5,0.3),
@@ -132,32 +110,29 @@ scene.add(box);
 lights.push({mesh:box,t:0,state:0});
 }
 
-// CHALET REALISTA
-function createChalets(){
-for(let i=0;i<60;i++){
+// 🏠 EDIFICIS ESTIL CHALET MILLORATS
+function createBuildings(){
+for(let i=0;i<80;i++){
 
 let h=4+Math.random()*4;
 
-// base pedra
 let base=new THREE.Mesh(
 new THREE.BoxGeometry(6,2,6),
 new THREE.MeshStandardMaterial({color:0x888888})
 );
 
-// part fusta
 let wood=new THREE.Mesh(
 new THREE.BoxGeometry(6,h,6),
 new THREE.MeshStandardMaterial({color:0x8b5a2b})
 );
 
-// sostre
 let roof=new THREE.Mesh(
 new THREE.ConeGeometry(5,3,4),
 new THREE.MeshStandardMaterial({color:0x5a2e1a})
 );
 
-let x=(Math.random()>0.5?1:-1)*(15+Math.random()*20);
-let z=-Math.random()*300;
+let x=(Math.random()>0.5?1:-1)*(18+Math.random()*20);
+let z=-Math.random()*600;
 
 base.position.set(x,1,z);
 wood.position.set(x,h/2+2,z);
@@ -171,9 +146,11 @@ scene.add(roof);
 }
 }
 
+// 🚗 COTXE MILLOR
 function createCar(){
 car=new THREE.Group();
 
+// cos
 let body=new THREE.Mesh(
 new THREE.BoxGeometry(2,1,4),
 new THREE.MeshStandardMaterial({color:0xffffff})
@@ -181,9 +158,18 @@ new THREE.MeshStandardMaterial({color:0xffffff})
 body.position.y=1;
 car.add(body);
 
+// cabina
+let cabin=new THREE.Mesh(
+new THREE.BoxGeometry(1.5,0.7,2),
+new THREE.MeshStandardMaterial({color:0x99ccff})
+);
+cabin.position.set(0,1.5,-0.3);
+car.add(cabin);
+
+// rodes
 for(let i=0;i<4;i++){
 let wheel=new THREE.Mesh(
-new THREE.CylinderGeometry(0.5,0.5,0.5,16),
+new THREE.CylinderGeometry(0.5,0.5,0.5,20),
 new THREE.MeshStandardMaterial({color:0x111})
 );
 wheel.rotation.z=Math.PI/2;
@@ -199,16 +185,19 @@ wheels.push(wheel);
 scene.add(car);
 }
 
+// 🎮 LOOP
 function animate(){
 requestAnimationFrame(animate);
 
+// moviment
 if(keys["ArrowUp"]) speed+=0.01;
 if(keys["ArrowDown"]) speed-=0.01;
 
-speed*=0.98;
+speed*=0.97;
 
-if(keys["ArrowLeft"]) steer=0.02;
-else if(keys["ArrowRight"]) steer=-0.02;
+// gir més realista
+if(keys["ArrowLeft"]) steer=0.025;
+else if(keys["ArrowRight"]) steer=-0.025;
 else steer=0;
 
 car.rotation.y+=steer*speed*5;
@@ -216,9 +205,14 @@ car.rotation.y+=steer*speed*5;
 car.position.x-=Math.sin(car.rotation.y)*speed;
 car.position.z-=Math.cos(car.rotation.y)*speed;
 
-wheels.forEach(w=>w.rotation.x+=speed*3);
+// rodes giren
+wheels.forEach(w=>w.rotation.x+=speed*4);
 
-camera.position.set(car.position.x,4,car.position.z+8);
+// càmera segueix bé el cotxe
+camera.position.x=car.position.x;
+camera.position.y=4;
+camera.position.z=car.position.z+8;
+
 camera.lookAt(car.position.x,2,car.position.z-6);
 
 // semàfors
@@ -232,4 +226,10 @@ l.mesh.material.color.set(l.state?0x00ff00:0xff0000);
 });
 
 renderer.render(scene,camera);
+}
+
+function resize(){
+camera.aspect=innerWidth/innerHeight;
+camera.updateProjectionMatrix();
+renderer.setSize(innerWidth,innerHeight);
 }
